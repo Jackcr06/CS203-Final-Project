@@ -44,17 +44,22 @@ function preload() {
 function create() {
     // Create the player paddle (left side)
     player = this.add.rectangle(50, 300, 20, 100, 0xFFFFFF);
-    this.physics.add.existing(player, true); // true makes it static
+    this.physics.add.existing(player);
+    player.body.setImmovable(true);
+    player.body.setCollideWorldBounds(true);
 
     // Create the AI paddle (right side)
     ai = this.add.rectangle(750, 300, 20, 100, 0xFFFFFF);
-    this.physics.add.existing(ai, true);
+    this.physics.add.existing(ai);
+    ai.body.setImmovable(true);
+    ai.body.setCollideWorldBounds(true);
 
     // Create the ball
     ball = this.add.circle(400, 300, 10, 0xFFFFFF);
     this.physics.add.existing(ball);
     ball.body.setCollideWorldBounds(true);
     ball.body.setBounce(1, 1);
+    ball.body.setMaxVelocity(600, 600);
 
     // Set up keyboard input
     cursors = this.input.keyboard.createCursorKeys();
@@ -106,21 +111,20 @@ function update() {
     }
 
     // Check for scoring
-    if (ball.x < 0) {
+    if (ball.x <= 0) {
         aiScore++;
         resetBall(true);
-    } else if (ball.x > 800) {
+        updateScoreText();
+    } else if (ball.x >= config.width) {
         playerScore++;
         resetBall(false);
+        updateScoreText();
     }
-
-    // Update score display
-    scoreText.setText(`${playerScore} - ${aiScore}`);
 }
 
 // Helper function to move paddles
 function movePaddle(paddle, speed) {
-    paddle.y += speed * (1/60); // Multiply by frame time for smooth movement
+    paddle.body.setVelocityY(speed);
     // Keep paddle within bounds
     paddle.y = Phaser.Math.Clamp(paddle.y, 50, 550);
 }
@@ -142,14 +146,27 @@ function startGame() {
     resetBall(Math.random() >= 0.5);
 }
 
+// Function to update score display
+function updateScoreText() {
+    scoreText.setText(`${playerScore} - ${aiScore}`);
+}
+
 // Function to reset the ball
 function resetBall(isAiServing) {
+    // Reset ball to center
     ball.setPosition(400, 300);
+    ball.body.setVelocity(0, 0);
     
-    // Reset ball velocity
-    const velocity = 400;
-    ball.body.setVelocity(
-        isAiServing ? -velocity : velocity,
-        (Math.random() - 0.5) * velocity
-    );
+    // Add a small delay before launching the ball
+    setTimeout(() => {
+        // Reset ball velocity
+        const velocity = 400;
+        const angleRange = Math.PI / 4; // 45 degrees
+        const angle = (Math.random() - 0.5) * angleRange;
+        
+        ball.body.setVelocity(
+            isAiServing ? -velocity * Math.cos(angle) : velocity * Math.cos(angle),
+            velocity * Math.sin(angle)
+        );
+    }, 1000); // 1 second delay
 }
