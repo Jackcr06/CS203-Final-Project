@@ -1,0 +1,19 @@
+/*CSS File (Contains all of the styling rules for the HTML)*/
+
+/* Reset default margin and padding */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #2c3e50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Style the game container */
+#gameContainer {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    overflow: hidden;
+}
